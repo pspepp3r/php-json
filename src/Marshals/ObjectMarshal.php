@@ -12,18 +12,16 @@ final class ObjectMarshal implements Marshal
 {
     public static function make(string $fileName): ObjectContent
     {
-        $fileName = static::nameFile($fileName);
-        static::abortIfExist($fileName);
-
-        \touch($fileName);
+        $fileName = static::prepareFile($fileName);
 
         return new ObjectContent($fileName);
     }
 
     public static function makeSafe(string $fileName): ObjectContent
     {
-        static::abortIfExist($fileName);
-        return new ObjectContent($fileName);
+        $fileName = static::prepareFile($fileName);
+
+        return new ObjectContent($fileName, true);
     }
 
     public function read(string $fileName): ObjectContent
@@ -56,5 +54,14 @@ final class ObjectMarshal implements Marshal
             return $fileName;
         }
         return "{$fileName}.json";
+    }
+
+    private static function prepareFile(string $fileName): string
+    {
+        $fileName = static::nameFile($fileName);
+        static::abortIfExist($fileName);
+
+        \touch($fileName);
+        return $fileName;
     }
 }

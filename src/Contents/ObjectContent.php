@@ -9,7 +9,7 @@ use PhpJson\Contracts\JsonContent;
 
 class ObjectContent implements JsonContent
 {
-    private $content;
+    private mixed $content;
 
     public function __construct(
         public readonly string $fileName,
@@ -21,8 +21,19 @@ class ObjectContent implements JsonContent
         if (!$this->content)
             $this->content = new \stdClass();
 
+        if ($this->flag && isset($this->content->name)) {
+            \unlink($this->fileName);
+            throw new \RuntimeException("Unable to override property $name");
+        }
+
         $this->content->$name = $value;
         return $this;
+    }
+
+    public function parseObject(object $dataObject): void
+    {
+        $this->content = $dataObject;
+        $this->store();
     }
 
     public function store(): void
