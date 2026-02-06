@@ -57,6 +57,8 @@ class ObjectContent implements JsonContent
             if (!\file_put_contents($this->fileName, $content))
                 throw new FileException();
         } catch (\JsonException | FileException) {
+        } finally {
+            unset($this->content);
         }
     }
 }
