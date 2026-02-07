@@ -10,5 +10,7 @@ interface JsonContent
 
     public function parseObject(object $dataObject): void;
 
+    public function setProperty(string $name, mixed $value): static;
+
     public function store(): void;
 }
