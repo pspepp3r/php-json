@@ -12,5 +12,7 @@ interface JsonContent
 
     public function setProperty(string $name, mixed $value): static;
 
+    public function appendProperty(string $name, mixed $value): static;
+
     public function store(): void;
 }

@@ -9,7 +9,10 @@ use PhpJson\Contracts\JsonContent;
 use ReflectionClass;
 use function is_object;
 
-final class ObjectContent implements JsonContent
+/**
+ * This class was left behind for reference of the formeer architecture. Will be removed in futture comits.
+ */
+class ObjectContent implements JsonContent
 {
     private mixed $content = \null;
 
@@ -20,12 +23,7 @@ final class ObjectContent implements JsonContent
 
     public function addProperty(string $name, mixed $value): static
     {
-        $this->prepareNewContent();
 
-        if (!\property_exists($this->content, $name)) {
-            $this->content->$name = $value;
-            return $this;
-        }
         \unlink($this->fileName);
         throw new \RuntimeException("Cannot override property, use setPropety() instead");
     }
@@ -41,7 +39,7 @@ final class ObjectContent implements JsonContent
             throw new \RuntimeException("Property $name doesn't exist in this object. Use addProperty() instead");
     }
 
-    public function appendProperty(string $name, mixed $value)
+    public function appendProperty(string $name, mixed $value): static
     {
 
         $this->prepareObjectContent();
@@ -56,48 +54,13 @@ final class ObjectContent implements JsonContent
 
     public function parseObject(object $dataObject): void
     {
-        $this->content = $dataObject;
-        $this->store();
-    }
-
-    /** @param class-string $class */
-    public function toDataObject(string $class)
-    {
-        $this->prepareObjectContent();
-
-        $reflectionClass = new ReflectionClass($class);
-
-        if (array_intersect(
-            array_map(
-                fn($parameter) =>  $parameter->name,
-                $reflectionClass->getConstructor()->getParameters()
-            ),
-            array_keys((array) $this->content)
-        ))
-            return new $class(...$this->recursivelyPopulate((array) $this->content, $reflectionClass));
-
-        throw new \RuntimeException('The DataObject and this JSONObject don\'t match');
-    }
-
-    private function recursivelyPopulate(array $data, ReflectionClass $reflectionClass): array
-    {
-        $result = [];
-        foreach ($data as $key => $value) {
-            if (is_object($value)) {
-                $valueClass = $reflectionClass->getProperty($key)?->getType()?->getName();
-                $result[$key] = ($valueClass && class_exists($valueClass)) ? new $valueClass(...$this->recursivelyPopulate((array) $value, new ReflectionClass($valueClass))) : $value;
-            } else {
-                $result[$key] = $value;
-            }
+        if ($this->content) {
+            $this->content = $dataObject;
+            $this->store();
         }
-        return $result;
-    }
 
-    private function prepareNewContent()
-    {
-        if (!$this->content) {
-            $this->content = new \stdClass();
-        }
+        \unlink($this->fileName);
+        throw new \RuntimeException("Unable to parse object.");
     }
 
     private function prepareObjectContent()
