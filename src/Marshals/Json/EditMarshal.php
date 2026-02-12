@@ -24,12 +24,56 @@ class EditMarshal extends BaseMarshal
     {
         if (!$this->content) $this->content = \json_decode(\file_get_contents($this->filename));
 
-        if ($key = \array_find_key($this->content, fn() => $this->content[$key])) {
-            unset($this->content[$key]);
-        } else {
+        // support "base[index]" notation
+        if (\is_string($key) && \preg_match('/^([^\[\]]+)\[(.+)\]$/', $key, $m)) {
+            $base = $m[1];
+            $inner = $m[2];
+
+            // object top-level
+            if (\is_object($this->content) && \property_exists($this->content, $base)) {
+                $container = $this->content->$base;
+                if (\is_array($container) && \array_key_exists($inner, $container)) {
+                    unset($this->content->$base[$inner]);
+                    return $this;
+                }
+                if (\is_object($container) && \property_exists($container, $inner)) {
+                    unset($this->content->$base->$inner);
+                    return $this;
+                }
+            }
+
+            // array top-level
+            if (\is_array($this->content) && \array_key_exists($base, $this->content)) {
+                $container = $this->content[$base];
+                if (\is_array($container) && \array_key_exists($inner, $container)) {
+                    unset($this->content[$base][$inner]);
+                    return $this;
+                }
+                if (\is_object($container) && \property_exists($container, $inner)) {
+                    unset($this->content[$base]->$inner);
+                    return $this;
+                }
+            }
+
             $this->reset();
             throw new \RuntimeException("This value does not exist.");
         }
+
+        // simple key removal
+        if (\is_object($this->content)) {
+            if (\property_exists($this->content, (string) $key)) {
+                unset($this->content->{(string) $key});
+                return $this;
+            }
+        } elseif (\is_array($this->content)) {
+            if (\array_key_exists($key, $this->content)) {
+                unset($this->content[$key]);
+                return $this;
+            }
+        }
+
+        $this->reset();
+        throw new \RuntimeException("This value does not exist.");
     }
 
     protected function reset(): void
