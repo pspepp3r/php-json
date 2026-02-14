@@ -1,11 +1,16 @@
 {
 	"name": "pspepp3r/php-json",
 	"description": "A PHP package for CRUD operation on JSON file.",
-	"type": "metapackage",
+	"type": "library",
 	"license": "MIT",
 	"autoload": {
 		"psr-4": {
 			"PhpJson\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"PhpJson\\Tests\\": "tests/"
 		}
 	},
 	"authors": [
