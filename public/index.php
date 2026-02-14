@@ -58,35 +58,33 @@ final class ProductCollection implements
     }
 }
 
-// /** @var \PhpJson\Marshals\Json\MakeMarshal */
-// $json_make_file = JsonAdapter::getMarshall('user');
+/** @var \PhpJson\Marshals\Json\MakeMarshal */
+$json_make_file = JsonAdapter::getMarshall('user');
 
-// $json_make_file->addValue('name', 'Prosper Pepple')
-//     ->addValue('email', 'prosperpepple12@mailer')
+// // $json_make_file->addValue('name', 'Prosper Pepple')
+// //     ->addValue('email', 'prosperpepple12@mailer')
+// //     ->store();
+
+$order = new \Order(
+    'i12',
+    200_000,
+    new \ProductCollection(['ice_cream', 'beans', 'shirt'])
+);
+$user = new User('Prosper Pepple', 'prosperpepple12@gmail.com', $order);
+$json_make_file->parseFrom($user);
+
+// /** @var \PhpJson\Marshals\Json\EditMarshal */
+// $json_edit_file = JsonAdapter::getMarshall('user');
+// $json_edit_file->setValue('name', 'Adam Pierce')
+//     ->setValue('email', 'adampierce@mail.com')
+//     // ->appendValue('age', 47)
+//     ->removeValue('order[productCollection][products][0]')
 //     ->store();
-
-// $order = new \Order(
-//     'i12',
-//     200_000,
-//     new \ProductCollection(['ice_cream', 'beans', 'shirt'])
-// );
-// $user = new User('Prosper Pepple', 'prosperpepple12@gmail.com', $order);
-// $json_make_file->parseFrom($user);
 
 /** @var \PhpJson\Marshals\Json\EditMarshal */
 $json_edit_file = JsonAdapter::getMarshall('user');
-$json_edit_file->setValue('name', 'Adam Pierce')
-    ->setValue('email', 'adampierce@mail.com')
-    // ->appendValue('age', 47)
-    ->removeValue('order[productCollection][products][0]')
-    ->store();
-
-// // If along the way an issue occurs, the file is reverted to the way it was, or deleted if it wasn't
-// // The EditMarshal calls a read/write lock on the file for either reading or writing .
-
-// $user = $json_edit_file->parseTo(User::class); // Cannot modify file until reset() is called.
-// $user = $json_edit_file->get();
-// $user = $json_edit_file->getAssociative(); // not inherited
+$json_edit_file->readMode()
+    ->toDataObject(User::class);
 
 // // The reset is used to cancel operations along the pipeline
 // $json_edit_file->appendValue('password', 'oaheisj');

@@ -14,5 +14,7 @@
 			"email": "prosperpepple12@gmail.com"
 		}
 	],
-	"require": {}
+	"require-dev": {
+		"phpunit/phpunit": "^13.0"
+	}
 }

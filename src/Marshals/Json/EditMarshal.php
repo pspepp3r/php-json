@@ -83,6 +83,11 @@ class EditMarshal extends BaseMarshal
         throw new \RuntimeException("This value does not exist.");
     }
 
+    public function readMode(): ReadMarshal
+    {
+        return new ReadMarshal($this->filename);
+    }
+
     protected function reset(): void
     {
         unset($this->content);
@@ -146,53 +151,5 @@ class EditMarshal extends BaseMarshal
         if (!$this->content) $this->content = [];
 
         $this->content[] = $value;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /** @param class-string $class */
-    public function toDataObject(string $class)
-    {
-        $reflectionClass = new \ReflectionClass($class);
-
-        if (\array_intersect(
-            \array_map(
-                fn($parameter) =>  $parameter->name,
-                $reflectionClass->getConstructor()->getParameters()
-            ),
-            \array_keys((array) $this->content)
-        ))
-            return new $class(...$this->recursivelyPopulate((array) $this->content, $reflectionClass));
-
-        throw new \RuntimeException('The DataObject and this JSONObject don\'t match');
-    }
-
-    private function recursivelyPopulate(array $data, \ReflectionClass $reflectionClass): array
-    {
-        $result = [];
-        foreach ($data as $key => $value) {
-            if (\is_object($value)) {
-                $valueClass = (string) $reflectionClass->getProperty($key)?->getType();
-                $result[$key] = ($valueClass && \class_exists($valueClass)) ?
-                    new $valueClass(...$this->recursivelyPopulate(
-                        (array) $value,
-                        new \ReflectionClass($valueClass)
-                    )) : $value;
-            } else {
-                $result[$key] = $value;
-            }
-        }
-        return $result;
     }
 }
