@@ -15,7 +15,7 @@ class MakeMarshal extends BaseMarshal
 
     public function parseFrom(object $dataObject): void
     {
-        if (!$this->content) {
+        if ($this->content === null) {
             $this->content = $dataObject;
             $this->store();
             return;

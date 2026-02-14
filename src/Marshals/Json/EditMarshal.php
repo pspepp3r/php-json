@@ -24,35 +24,42 @@ class EditMarshal extends BaseMarshal
     {
         if (!$this->content) $this->content = \json_decode(\file_get_contents($this->filename));
 
-        // support "base[index]" notation
-        if (\is_string($key) && \preg_match('/^([^\[\]]+)\[(.+)\]$/', $key, $m)) {
-            $base = $m[1];
-            $inner = $m[2];
+        // support "base[index][inner]..." notation
+        if (\is_string($key) && \preg_match_all('/([^\[\]]+)/', $key, $m)) {
+            $segments = $m[1];
+            $last = \array_pop($segments);
 
-            // object top-level
-            if (\is_object($this->content) && \property_exists($this->content, $base)) {
-                $container = $this->content->$base;
-                if (\is_array($container) && \array_key_exists($inner, $container)) {
-                    unset($this->content->$base[$inner]);
-                    return $this;
-                }
-                if (\is_object($container) && \property_exists($container, $inner)) {
-                    unset($this->content->$base->$inner);
-                    return $this;
+            $current = &$this->content;
+
+            foreach ($segments as $seg) {
+                if (\is_object($current)) {
+                    if (\property_exists($current, $seg)) {
+                        $current = &$current->$seg;
+                    } else {
+                        $this->reset();
+                        throw new \RuntimeException("This value does not exist.");
+                    }
+                } elseif (\is_array($current)) {
+                    if (\array_key_exists($seg, $current)) {
+                        $current = &$current[$seg];
+                    } else {
+                        $this->reset();
+                        throw new \RuntimeException("This value does not exist.");
+                    }
+                } else {
+                    $this->reset();
+                    throw new \RuntimeException("This value does not exist.");
                 }
             }
 
-            // array top-level
-            if (\is_array($this->content) && \array_key_exists($base, $this->content)) {
-                $container = $this->content[$base];
-                if (\is_array($container) && \array_key_exists($inner, $container)) {
-                    unset($this->content[$base][$inner]);
-                    return $this;
-                }
-                if (\is_object($container) && \property_exists($container, $inner)) {
-                    unset($this->content[$base]->$inner);
-                    return $this;
-                }
+            if (\is_object($current) && \property_exists($current, $last)) {
+                unset($current->$last);
+                return $this;
+            }
+
+            if (\is_array($current) && \array_key_exists($last, $current)) {
+                unset($current[$last]);
+                return $this;
             }
 
             $this->reset();
@@ -140,9 +147,6 @@ class EditMarshal extends BaseMarshal
 
         $this->content[] = $value;
     }
-
-
-
 
 
 

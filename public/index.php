@@ -58,8 +58,8 @@ final class ProductCollection implements
     }
 }
 
-/** @var \PhpJson\Marshals\Json\MakeMarshal */
-$json_make_file = JsonAdapter::getMarshall('user');
+// /** @var \PhpJson\Marshals\Json\MakeMarshal */
+// $json_make_file = JsonAdapter::getMarshall('user');
 
 // $json_make_file->addValue('name', 'Prosper Pepple')
 //     ->addValue('email', 'prosperpepple12@mailer')
@@ -77,8 +77,8 @@ $json_make_file = JsonAdapter::getMarshall('user');
 $json_edit_file = JsonAdapter::getMarshall('user');
 $json_edit_file->setValue('name', 'Adam Pierce')
     ->setValue('email', 'adampierce@mail.com')
-    ->appendValue('age', 47)
-    // ->removeValue('age')
+    // ->appendValue('age', 47)
+    ->removeValue('order[productCollection][products][0]')
     ->store();
 
 // // If along the way an issue occurs, the file is reverted to the way it was, or deleted if it wasn't
